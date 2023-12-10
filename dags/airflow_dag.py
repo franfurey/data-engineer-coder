@@ -5,15 +5,7 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.utils.dates import days_ago
 from my_data_pipeline import fetch_and_process_data, load_data_to_redshift
 
-
 dag_path = os.getcwd()
-
-# redshift_conn = {
-#     'host': url,
-#     'username': user,
-#     'port': '5439',
-#     'pwd': pwd
-# }
 
 # Argumentos por defecto para el DAG
 default_args = {
@@ -38,6 +30,7 @@ print("DAG setup complete")
 task_1 = PythonOperator(
     task_id='fetch_and_process_data',
     python_callable=fetch_and_process_data,
+    provide_context=True,  # Asegúrate de habilitar provide_context si es necesario
     dag=dag,
 )
 
@@ -45,6 +38,8 @@ task_1 = PythonOperator(
 task_2 = PythonOperator(
     task_id='load_data_to_redshift',
     python_callable=load_data_to_redshift,
+    provide_context=True,  # Asegúrate de habilitar provide_context si es necesario
+    op_kwargs={'dataframes': "{{ task_instance.xcom_pull(task_ids='fetch_and_process_data') }}"},
     dag=dag,
 )
 

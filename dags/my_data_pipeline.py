@@ -120,13 +120,16 @@ def fetch_and_process_data():
     dataframes = {}
     for contaminant in ['o3', 'pm10', 'pm25', 'uvi']:
         df = create_dataframe_for_contaminant(contaminant, cities_data)
-        dataframes[contaminant] = df
+        # Convertir el DataFrame a una lista de diccionarios
+        dataframes[contaminant] = df.to_dict(orient='records')
     return dataframes
 
 def load_data_to_redshift(dataframes):
     conn = connect_to_redshift()
     if conn:
-        for contaminant, df in dataframes.items():
+        for contaminant, df_dict in dataframes.items():
+            # Reconstruir el DataFrame
+            df = pd.DataFrame(df_dict)
             table_name = f"air_quality_{contaminant}"
             cargar_en_redshift(conn, table_name, df)
         conn.close()
