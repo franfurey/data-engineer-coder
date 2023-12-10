@@ -1,8 +1,19 @@
+import os
 from datetime import timedelta
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.utils.dates import days_ago
-from dags.my_data_pipeline import fetch_and_process_data, load_data_to_redshift
+from my_data_pipeline import fetch_and_process_data, load_data_to_redshift
+
+
+dag_path = os.getcwd()
+
+# redshift_conn = {
+#     'host': url,
+#     'username': user,
+#     'port': '5439',
+#     'pwd': pwd
+# }
 
 # Argumentos por defecto para el DAG
 default_args = {
@@ -13,6 +24,7 @@ default_args = {
 }
 
 # Definición del DAG
+print("Setting up the DAG")
 dag = DAG(
     dag_id='air_quality_data_ingestion',
     default_args=default_args,
@@ -20,6 +32,7 @@ dag = DAG(
     schedule_interval=timedelta(days=1),
     catchup=False
 )
+print("DAG setup complete")
 
 # Tarea 1: Recuperar y procesar los datos
 task_1 = PythonOperator(

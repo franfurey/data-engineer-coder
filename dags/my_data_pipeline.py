@@ -10,6 +10,7 @@ from psycopg2.extras import execute_values
 load_dotenv()
 
 def fetch_air_quality(city):
+    print(f"Fetching air quality for {city}")
     token = os.getenv("API_TOKEN")
     url = f"https://api.waqi.info/feed/{city}/?token={token}"
     response = requests.get(url)
@@ -34,6 +35,7 @@ cities = ["amsterdam", "berlin", "paris"]
 contaminants = ['o3', 'pm10', 'pm25', 'uvi']
 
 def create_dataframe_for_contaminant(contaminant, cities_data):
+    print(f"Creating dataframe for {contaminant}")
     data_list = []
     for city, city_data in cities_data.items():
         if 'forecast' in city_data and 'daily' in city_data['forecast'] and contaminant in city_data['forecast']['daily']:
@@ -62,6 +64,7 @@ for contaminant in contaminants:
     print("-" * 40)
 
 def cargar_en_redshift(conn, table_name, dataframe):
+    print(f"Loading data into Redshift table {table_name}")
     dtypes = dataframe.dtypes
     cols = list(dtypes.index)
     tipos = list(dtypes.values)
@@ -93,7 +96,7 @@ def connect_to_redshift():
     db_name = os.getenv("DB_NAME")
     db_user = os.getenv("DB_USER")
     db_port = os.getenv("DB_PORT")
-    db_password = os.getenv("DB_PASSWORD_FILE")  # Asumiendo que cargas la contraseña directamente
+    db_password = os.getenv("DB_PASSWORD_FILE")
 
     try:
         conn = psycopg2.connect(
