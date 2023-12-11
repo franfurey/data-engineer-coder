@@ -3,16 +3,41 @@ import json
 import requests
 import psycopg2
 import pandas as pd
-from dotenv import load_dotenv
 from psycopg2.extras import execute_values
 
-# Cargar variables de entorno desde el archivo .env
-load_dotenv()
+from datetime import timedelta,datetime
+from pathlib import Path
+import json
+import requests
+import psycopg2
+from airflow import DAG
+from sqlalchemy import create_engine
+# Operadores
+from airflow.operators.python_operator import PythonOperator
+from psycopg2.extras import execute_values
+
+#from airflow.utils.dates import days_ago
+import pandas as pd
+import os
+
+url="data-engineer-cluster.cyhh5bfevlmn.us-east-1.redshift.amazonaws"
+data_base="data-engineer-database"
+user="franciscofurey_coderhouse"
+pwd="nFU3H5r7S8"
+
+redshift_conn = {
+    'host': url,
+    'username': user,
+    'database': data_base,
+    'port': '5439',
+    'pwd': pwd
+}
+
 
 def fetch_air_quality(city):
     print(f"Fetching air quality for {city}")
-    token = os.getenv("API_TOKEN")
-    url = f"https://api.waqi.info/feed/{city}/?token={token}"
+    # token = os.getenv("API_TOKEN")
+    url = f"https://api.waqi.info/feed/{city}/?token=a5bb8b40338e56043cb70a20c6ff6fdb4f159b4a"
     response = requests.get(url)
 
     if response.status_code == 200:
@@ -92,11 +117,17 @@ def cargar_en_redshift(conn, table_name, dataframe):
 
 # Función para conectarse a Redshift
 def connect_to_redshift():
-    db_host = os.getenv("DB_HOST")
-    db_name = os.getenv("DB_NAME")
-    db_user = os.getenv("DB_USER")
-    db_port = os.getenv("DB_PORT")
-    db_password = os.getenv("DB_PASSWORD_FILE")
+    url="data-engineer-cluster.cyhh5bfevlmn.us-east-1.redshift.amazonaws.com"
+    db_host = 'data-engineer-cluster.cyhh5bfevlmn.us-east-1.redshift.amazonaws.com'
+    db_name=redshift_conn["database"],
+    db_user=redshift_conn["username"],
+    db_port = '5439'
+    db_password=redshift_conn["pwd"],
+    # db_host = os.getenv("DB_HOST")
+    # db_name = os.getenv("DB_NAME")
+    # db_user = os.getenv("DB_USER")
+    # db_port = os.getenv("DB_PORT")
+    # db_password = os.getenv("DB_PASSWORD_FILE")
 
     try:
         conn = psycopg2.connect(
